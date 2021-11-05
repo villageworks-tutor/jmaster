@@ -187,4 +187,23 @@ class ItemDaoTest {
 			}
 		}
 	}
+
+	@Nested
+	@DisplayName("ItemDAO#updateメソッドのテスト")
+	class update {
+		@Test
+		@DisplayName("商品番号9の商品の価格を2200円から1900円に変更できる。")
+		void testUpdate_() throws Exception {
+			// setup
+			int code = 9;
+			int price = 1900;
+			ItemBean expected = new ItemBean(9, "Play the BasketBall", 2200);
+			expected.setPrice(price);
+			// execute
+			sut.update(code, price);
+			ItemBean actual = sut.findByCode(code);
+			// verify
+			assertThat(actual, is(new EqualToItem(expected)));
+		}
+	}
 }
