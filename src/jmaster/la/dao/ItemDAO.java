@@ -89,6 +89,51 @@ public class ItemDAO {
 	}
 
 	/**
+	 * 指定された商品番号に合致した商品を取得する。
+	 * @param code 取得する商品の商品番号
+	 * @return 商品クラスのインスタンス
+	 * @throws DAOException
+	 */
+	public ItemBean findByCode(int code) throws DAOException {
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		if (this.conn == null)
+			try {
+				// データベース接続オブジェクトが開放されている場合は取得し直す
+				this.getConnection();
+				String sql = "SELECT code, name, price FROM item WHERE code = ?";
+				pstmt = this.conn.prepareStatement(sql);
+				// プレースホルダを設定
+				pstmt.setInt(1, code);
+				// SQLの実行結果を結果セットに代入
+				rs= pstmt.executeQuery();
+				// 結果セットから商品を取得
+				ItemBean bean = null;
+				if (rs.next()) {
+					bean = new ItemBean();
+					bean.setCode(rs.getInt("code"));
+					bean.setName(rs.getString("name"));
+					bean.setPrice(rs.getInt("price"));
+				}
+				return bean;
+			} catch (SQLException e) {
+				// TODO 自動生成された catch ブロック
+				e.printStackTrace();
+				throw new DAOException("レコードの取得に失敗しました。");
+			} finally {
+				try {
+					if (rs != null) rs.close();
+					if (pstmt != null) pstmt.close();
+					this.close();
+				} catch (SQLException e) {
+					throw new DAOException("リソースの解放に失敗しました。");
+				}
+			}
+
+		return null;
+	}
+
+	/**
 	 * 指定した金額以下の価格の商品を取得する。
 	 * @param price 価格検索の上限金額
 	 * @return List<ItemBean> 商品リスト
@@ -206,10 +251,17 @@ public class ItemDAO {
 		}
 	}
 
+	/**
+	 * 指定された商品番号の商品を削除する。
+	 * @param code 削除する商品の商品番号
+	 * @return 追加に成功した場合は1、それ以外はDAO例外として返却されない。
+	 * @throws DAOException
+	 */
 	public int delete(int code) throws DAOException {
 		PreparedStatement pstmt = null;
 		String sql = "DELETE FROM item WHERE code = ?";
 		try {
+			// データベース接続オブジェクトが開放されている場合は取得し直す
 			if (this.conn == null) this.getConnection();
 			pstmt = this.conn.prepareStatement(sql);
 			// プレースホルダを設定
@@ -228,6 +280,32 @@ public class ItemDAO {
 			}
 		}
 
+	}
+
+	public int update(int code, int price) throws DAOException {
+		PreparedStatement pstmt = null;
+		String sql = "UPDATE item SET price = ? WHERE code = ?";
+		try {
+			// データベース接続オブジェクトが開放されている場合は取得し直す
+			if (this.conn == null) this.getConnection();
+			pstmt = this.conn.prepareStatement(sql);
+			// プレースホルダを設定
+			pstmt.setInt(1, price);
+			pstmt.setInt(2, code);
+			// SQLを実行
+			return pstmt.executeUpdate();
+		} catch (SQLException e) {
+			// TODO 自動生成された catch ブロック
+			e.printStackTrace();
+			throw new DAOException("レコードの変更に失敗しました。");
+		} finally {
+			try {
+				if (pstmt != null) pstmt.close();
+				this.close();
+			} catch (SQLException e) {
+				throw new DAOException("リソースの解放に失敗しました。");
+			}
+		}
 	}
 
 	/**

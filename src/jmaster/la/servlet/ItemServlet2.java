@@ -97,6 +97,21 @@ public class ItemServlet2 extends HttpServlet {
 				request.setAttribute("items", items);
 				// 画面遷移
 				this.gotoPage(request, response, "/showItem2.jsp");
+			} else if (action.equals("update")) {
+				// リクエストパラメータのactionキーが「変更（update）」の場合
+				// リクエストパラメータを取得
+				String codeString = request.getParameter("code");
+				int code = Integer.parseInt(codeString);
+				String priceString = request.getParameter("price");
+				int price = Integer.parseInt(priceString);
+				// 変更を実行
+				dao.update(code, price);
+				// 全件検索を実行
+				List<ItemBean> items = dao.findAll();
+				// 検索結果をリクエストスコープに登録
+				request.setAttribute("items", items);
+				// 画面遷移
+				this.gotoPage(request, response, "/showItem2.jsp");
 			}
 		} catch (DAOException e) {
 			e.printStackTrace();
